@@ -10,8 +10,8 @@ type Task = {
   id: string;
   title: string;
   description?: string;
-  status: "TODO" | "IN_PROGRESS" | "DONE";
-  priority: "LOW" | "MEDIUM" | "HIGH";
+  status: "todo" | "inprogress" | "done";
+  priority: "low" | "medium" | "high";
   assigned?: string;
 };
 

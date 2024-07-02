@@ -1,6 +1,5 @@
 "use client";
 
-import { columns } from "../components/ui/columns";
 import { DataTable } from "../components/ui/DataTable";
 import { UserNav } from "../components/navbar";
 import { CreateTask } from "@/components/createtask";
@@ -22,7 +21,7 @@ export function WrapperClient() {
             <UserNav />
           </div>
         </div>
-        <DataTable columns={columns} />
+        <DataTable />
       </div>
     </RoomProvider>
   );

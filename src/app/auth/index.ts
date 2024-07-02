@@ -12,13 +12,13 @@ const authProvider: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials): Promise<any> {
-        const res = await fetch("http://localhost:3000/api/user", {
+        const res = await fetch(`${process.env.SITE_URL}/api/user`, {
           method: "POST",
           body: JSON.stringify(credentials),
           headers: { "Content-Type": "application/json" },
         });
         const user = await res.json();
-
+        console.log("user ", user, res);
         // If no error and we have user data, return it
         if (res.ok && user) {
           return user;

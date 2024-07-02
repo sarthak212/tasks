@@ -24,21 +24,55 @@ import {
   TableHeader,
   TableRow,
 } from "./table";
+import { useUpdateTask } from "@/hooks/useTasks";
+import { useLiveBlockTasks } from "@/hooks/useLiveBlockTasks";
+import { useMemo, useState } from "react";
+import { getColumns } from "../../components/ui/columns";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { useTasks } from "@/hooks/useTasks";
 import { NoData } from "../NotData";
 import { useEventListener } from "@/lib/liveblocks";
+import { useUsers } from "@/hooks/useUser";
 // import { DataTableToolbar } from "./data-table-toolbar";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-}
+interface DataTableProps<TData, TValue> {}
 
-export function DataTable<TData, TValue>({
-  columns,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({}: DataTableProps<TData, TValue>) {
+  const updateTask = useUpdateTask();
+  const [listData, setListData] = useState<any>([]);
+  const { createTask: liveBlockCreate } = useLiveBlockTasks();
+  const { data: userData } = useUsers();
+  const onUpdate = (data: { id: string; data: any }) => {
+    setListData((prev: any) => {
+      return prev.map((item: any) => {
+        if (item.id === data.id) {
+          return {
+            ...item,
+            ...data.data,
+          };
+        }
+        return item;
+      });
+    });
+    updateTask.mutate(
+      {
+        id: data.id,
+        data: data.data,
+      },
+      {
+        onSuccess: (responseData) => {
+          liveBlockCreate(responseData);
+        },
+      }
+    );
+  };
+  const columns = useMemo<any>(
+    () => getColumns(onUpdate, userData),
+    [onUpdate, userData]
+  );
   const { data, isLoading, error, refetch } = useTasks();
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -47,6 +81,13 @@ export function DataTable<TData, TValue>({
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  React.useEffect(() => {
+    if (data) {
+      data.sort((a: any, b: any) => a.title.localeCompare(b.title));
+      setListData(data);
+    }
+  }, [data]);
+
   useEventListener(({ event }) => {
     if (event.type === "TASK_CREATED") {
       refetch();
@@ -54,13 +95,21 @@ export function DataTable<TData, TValue>({
   });
 
   const table = useReactTable({
-    data,
+    data: listData,
     columns,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
+    },
+    initialState: {
+      sorting: [
+        {
+          id: "title",
+          desc: false,
+        },
+      ],
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -75,7 +124,7 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
   if (isLoading) return <div>Loading...</div>;
-  if (error || data.length == 0) return <NoData />;
+  if (error || listData.length == 0) return <NoData />;
   return (
     <div className="space-y-4">
       {/* <DataTableToolbar table={table} /> */}

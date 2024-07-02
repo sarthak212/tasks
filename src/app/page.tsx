@@ -23,6 +23,7 @@ export default async function Home({}) {
     <AuthProvider>
       <Providers>
         <div className="md:hidden"></div>
+
         <WrapperClient />
       </Providers>
     </AuthProvider>

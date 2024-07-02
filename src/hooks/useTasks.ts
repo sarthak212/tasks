@@ -15,6 +15,20 @@ interface TaskInterface {
   userId?: string;
 }
 
+async function updateTask({ id, data }: { id: string; data: TaskInterface }) {
+  const res = await fetch(`/api/update-task`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: id,
+      data: data,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to update task");
+
+  return res.json();
+}
+
 async function createTask(newTask: TaskInterface) {
   const res = await fetch("/api/tasks", {
     method: "POST",
@@ -34,6 +48,16 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
