@@ -43,30 +43,33 @@ export function DataTable<TData, TValue>({}: DataTableProps<TData, TValue>) {
   const [listData, setListData] = useState<any>([]);
   const { createTask: liveBlockCreate } = useLiveBlockTasks();
   const { data: userData } = useUsers();
-  const onUpdate = (data: { id: string; data: any }) => {
-    setListData((prev: any) => {
-      return prev.map((item: any) => {
-        if (item.id === data.id) {
-          return {
-            ...item,
-            ...data.data,
-          };
-        }
-        return item;
+  const onUpdate = React.useCallback(
+    (data: { id: string; data: any }) => {
+      setListData((prev: any) => {
+        return prev.map((item: any) => {
+          if (item.id === data.id) {
+            return {
+              ...item,
+              ...data.data,
+            };
+          }
+          return item;
+        });
       });
-    });
-    updateTask.mutate(
-      {
-        id: data.id,
-        data: data.data,
-      },
-      {
-        onSuccess: (responseData) => {
-          liveBlockCreate(responseData);
+      updateTask.mutate(
+        {
+          id: data.id,
+          data: data.data,
         },
-      }
-    );
-  };
+        {
+          onSuccess: (responseData) => {
+            liveBlockCreate(responseData);
+          },
+        }
+      );
+    },
+    [setListData, updateTask, liveBlockCreate]
+  );
   const columns = useMemo<any>(
     () => getColumns(onUpdate, userData),
     [onUpdate, userData]

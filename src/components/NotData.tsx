@@ -19,7 +19,7 @@ export function NoData() {
       <div>
         <AlertTitle>No tasks yet</AlertTitle>
         <AlertDescription>
-          You haven't added any tasks. Please add a new task to get started.
+          {"You haven't added any tasks. Please add a new task to get started."}
         </AlertDescription>
       </div>
     </Alert>
